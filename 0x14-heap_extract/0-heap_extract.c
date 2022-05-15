@@ -12,32 +12,32 @@
 
 int heap_extract(heap_t **root)
 {
-  int value = 0, check = 1;
-  size_t height = 0, level = 0;
-  heap_t *left = NULL, *right = NULL, *last = NULL;
+int value = 0, check = 1;
+size_t height = 0, level = 0;
+heap_t *left = NULL, *right = NULL, *last = NULL;
 
-  /* NULL checks */
-  if (root == NULL || *root == NULL)
-    return (0);
+/* NULL checks */
+if (root == NULL || *root == NULL)
+return (0);
 
-  /* if not NULL, initialize variables with root node info */
-  value = (*root)->n;
-  left = (*root)->left;
-  right = (*root)->right;
+/* if not NULL, initialize variables with root node info */
+value = (*root)->n;
+left = (*root)->left;
+right = (*root)->right;
 
-  /* find replacement node (last level-order node) */
-  height = binary_tree_height(*root);
-  for (level = 0; level <= height; level++)
-    find_replacement(*root, level, &last);
+/* find replacement node (last level-order node) */
+height = binary_tree_height(*root);
+for (level = 0; level <= height; level++)
+find_replacement(*root, level, &last);
 
-  /* extract root and replace with found last level order node */
-  free_and_replace(root, &left, &right, &last);
+/* extract root and replace with found last level order node */
+free_and_replace(root, &left, &right, &last);
 
-  /* heapify (swap) to maintain Max Binary Heap */
-  while (last && check)
-    heapify(root, last, &check);
+/* heapify (swap) to maintain Max Binary Heap */
+while (last && check)
+heapify(root, last, &check);
 
-  return (value);
+return (value);
 }
 
 /**
@@ -50,9 +50,9 @@ int heap_extract(heap_t **root)
 
 size_t binary_tree_height(heap_t *root)
 {
-  if (root == NULL)
-    return (0);
-  return (1 + binary_tree_height(root->left));
+if (root == NULL)
+return (0);
+return (1 + binary_tree_height(root->left));
 }
 
 /**
@@ -69,12 +69,12 @@ size_t binary_tree_height(heap_t *root)
 
 void find_replacement(heap_t *root, size_t level, heap_t **last)
 {
-  if (root == NULL)
-    return;
-  if (level == 0)
-    (*last) = root;
-  find_replacement(root->left, level - 1, last);
-  find_replacement(root->right, level - 1, last);
+if (root == NULL)
+return;
+if (level == 0)
+(*last) = root;
+find_replacement(root->left, level - 1, last);
+find_replacement(root->right, level - 1, last);
 }
 
 /**
@@ -90,35 +90,35 @@ void find_replacement(heap_t *root, size_t level, heap_t **last)
 void free_and_replace(heap_t **root, heap_t **left,
 		      heap_t **right, heap_t **last)
 {
-  /* extract and reset root pointer if only node */
-  if (*last == *root)
-    {
-      free(*root);
-      *root = NULL;
-      *last = NULL;
-      return;
-    }
-  /* extracts root node and replaces with node found above */
-  if ((*last)->parent->left == (*last))
-    (*last)->parent->left = NULL;
-  else if ((*last)->parent->right == (*last))
-    (*last)->parent->right = NULL;
-  (*last)->parent = NULL;
-  free(*root);
-  *root = *last;
+/* extract and reset root pointer if only node */
+if (*last == *root)
+{
+free(*root);
+*root = NULL;
+*last = NULL;
+return;
+}
+/* extracts root node and replaces with node found above */
+if ((*last)->parent->left == (*last))
+(*last)->parent->left = NULL;
+else if ((*last)->parent->right == (*last))
+(*last)->parent->right = NULL;
+(*last)->parent = NULL;
+free(*root);
+*root = *last;
 
-  if ((*left) != (*last))
-    {
-      (*last)->left = (*left);
-      if (*left)
-	(*left)->parent = (*last);
-    }
-  if ((*right) != (*last))
-    {
-      (*last)->right = (*right);
-      if (*right)
-	(*right)->parent = (*last);
-    }
+if ((*left) != (*last))
+{
+(*last)->left = (*left);
+if (*left)
+(*left)->parent = (*last);
+}
+if ((*right) != (*last))
+{
+(*last)->right = (*right);
+if (*right)
+(*right)->parent = (*last);
+}
 }
 
 /**
@@ -130,33 +130,33 @@ void free_and_replace(heap_t **root, heap_t **left,
 
 void heapify(heap_t **root, heap_t *current, int *check)
 {
-  heap_t *max = NULL, *left = current->left, *right = current->right;
+heap_t *max = NULL, *left = current->left, *right = current->right;
 
-  max = current;
-  if (left && left->n > max->n)
-    max = left;
-  if (right && right->n > max->n)
-    max = right;
-  if (current == max)
-    {
-      *check = 0;
-      return;
-    }
-  max->parent = current->parent;
-  if (current->parent == NULL)
-    *root = max;
-  else if (current->parent->left == current)
-    current->parent->left = max;
-  else if (current->parent->right == current)
-    current->parent->right = max;
-  current->left = max->left;
-  if (max->left)
-    max->left->parent = current;
-  current->right = max->right;
-  if (max->right)
-    max->right->parent = current;
-  if (max == left)
-    {
+max = current;
+if (left && left->n > max->n)
+max = left;
+if (right && right->n > max->n)
+max = right;
+if (current == max)
+{
+*check = 0;
+return;
+}
+max->parent = current->parent;
+if (current->parent == NULL)
+*root = max;
+else if (current->parent->left == current)
+current->parent->left = max;
+else if (current->parent->right == current)
+current->parent->right = max;
+current->left = max->left;
+if (max->left)
+max->left->parent = current;
+current->right = max->right;
+if (max->right)
+max->right->parent = current;
+if (max == left)
+{
 max->right = right;
 if (right)
 right->parent = max;
