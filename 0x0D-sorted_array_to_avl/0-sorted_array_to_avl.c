@@ -10,15 +10,15 @@
  */
 avl_t *binary_tree_node(avl_t *parent, int value)
 {
-  avl_t *tmp = malloc(sizeof(avl_t));
+avl_t *tmp = malloc(sizeof(avl_t));
 
-  if (!tmp)
-    return (NULL);
+if (!tmp)
+return (NULL);
 
-  tmp->n = value;
-  tmp->left = tmp->right = NULL;
-  tmp->parent = parent;
-  return (tmp);
+tmp->n = value;
+tmp->left = tmp->right = NULL;
+tmp->parent = parent;
+return (tmp);
 }
 /**
  * insert - recursive insert nodes
@@ -31,18 +31,18 @@ avl_t *binary_tree_node(avl_t *parent, int value)
  */
 avl_t *insert(avl_t *root, int *array, int left, int right)
 {
-  avl_t *tmp;
-  int i;
+avl_t *tmp;
+int i;
 
-  if (left > right)
-    return (NULL);
-  i = (right + left) / 2;
-  tmp = binary_tree_node(root, array[i]);
-  if (!tmp)
-    return (NULL);
-  tmp->left = insert(tmp, array, left, i - 1);
-  tmp->right = insert(tmp, array, i + 1, right);
-  return (tmp);
+if (left > right)
+return (NULL);
+i = (right + left) / 2;
+tmp = binary_tree_node(root, array[i]);
+if (!tmp)
+return (NULL);
+tmp->left = insert(tmp, array, left, i - 1);
+tmp->right = insert(tmp, array, i + 1, right);
+return (tmp);
 }
 /**
  * sorted_array_to_avl - create avl tree from sorted array
@@ -55,13 +55,13 @@ avl_t *insert(avl_t *root, int *array, int left, int right)
  */
 avl_t *sorted_array_to_avl(int *array, size_t size)
 {
-  avl_t *root = NULL;
-  size_t left, right;
+avl_t *root = NULL;
+size_t left, right;
 
-  if (!array || size <= 0)
-    return (NULL);
-  left = 0;
-  right = size - 1;
-  root = insert(root, array, left, right);
-  return (root);
+if (!array || size <= 0)
+return (NULL);
+left = 0;
+right = size - 1;
+root = insert(root, array, left, right);
+return (root);
 }
