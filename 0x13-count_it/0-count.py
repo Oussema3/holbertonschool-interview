@@ -1,102 +1,77 @@
 #!/usr/bin/python3
 """
-    Querie the Reddit API
+Defines recursive function to query the Reddit API,
+parse titles of all hot articles, and print sorted count
 """
-import itertools
-import requests
-# Libraries imported in your Python files must be organized in alphabetical
-# order
-
-# initiate a result dictionary
-result_dict = {}
 
 
-def sort_dictionary(result_dict):
+def count_words(subreddit, word_list, after=None, count={}):
     """
-    sort the dictionary
+    Queries the Reddit API, parses titles of all hot articles,
+    and prints sorted count
+    parameters:
+        subreddit: subreddit to query for hot articles
+        word_list: list of keywords to count
+        after: indicates next starting point to get data after
+        count: dictionary of current count of keyword
     """
-    sorted_by_values = sorted(result_dict.items(),
-                              key=lambda kv: kv[1],
-                              reverse=True)
-
-    sorted_dict = []
-    for _, v in itertools.groupby(sorted_by_values, lambda item: item[1]):
-        sorted_dict.extend(sorted(v))
-
-    return dict(sorted_dict)
-
-
-def get_reddit(subreddit):
-    """
-    Make the Request
-    """
-    try:
-        base_url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=100&t='all'"
-        request = requests.get(base_url, headers={'User-agent': 'my-app/0.0.1'}, allow_redirects=False)
-    except:
-        print('An Error Occured')
-    return request.json()
-
-
-def get_post_titles(r):
-    '''
-    Get a List of post titles
-    '''
-    posts = []
-    for post in r['data']['children']:
-        x = post['data']['title']
-        posts.append(x)
-    return posts
-
-
-def count_words(subreddit, word_list):
-    """
-    Method:
-        to querie the Reddit API, parse the title of all hot articles,
-        and print a sorted count of given keywords (case-insensitive,
-        delimited by spaces. Javascript should count as javascript,
-        but java should not).
-    Parameters:
-        subreddit:
-        word_list:
-    Returns:
-        prints a sorted count of given keywords.
-        (case-insensitive, delimited by spaces)
-    """
-    global result_dict
-    if len(word_list) == 0:
-        for k, v in result_dict.items():
-            if v != 0:
-                print("{}: {}".format(k, v))
-        return
+    import json
+    import requests
+    if after is None:
+        sub_URL = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
     else:
-        # do the work!
-        request_api = get_reddit(subreddit)
-        titles_list = get_post_titles(request_api)
-
-        # count_python = 0
-        # for title in titles_list:
-        #     count_python  += title.lower().count("python")
-        #     print(count_python)
-
-        # work on the first element of the list
-        word_to_count = word_list[0].lower()
-        for title in titles_list:
-            # save the count result into the dictionary
-            # add or append data to the dictionary
-            if word_to_count in result_dict:
-                prev_count = result_dict[word_to_count]
+        sub_URL = 'https://www.reddit.com/r/{}/hot.json?after={}'.format(
+            subreddit, after)
+    subreddit_info = requests.get(sub_URL,
+                                  headers={"user-agent": "user"},
+                                  allow_redirects=False)
+    for word in word_list:
+        word = word.lower()
+        if word not in count.keys():
+            count[word] = 0
+    try:
+        data = subreddit_info.json().get("data")
+    except:
+        return
+    children = data.get("children")
+    for child in children:
+        title = (child.get("data").get("title").lower())
+        title = title.split(' ')
+        for word in word_list:
+            word = word.lower()
+            count[word] += title.count(word)
+    after = data.get("after")
+    if after is not None:
+        return count_words(subreddit, word_list, after, count)
+    result = []
+    for k in count.keys():
+        if count[k] != 0:
+            if result == []:
+                result.append("{}: {}".format(k, count[k]))
             else:
-                prev_count = 0
-            new_count = title.lower().count(word_to_count)
-            # print(word_to_count)
-            # print(title)
-            # print(new_count)
-            result_dict[word_to_count] = new_count + prev_count
-
-        result_dict = sort_dictionary(result_dict)
-        # print(result_dict)
-        # remove the first element from the word_list
-        word_list.pop(0)
-        # recall the function with new wordlist
-        count_words(subreddit, word_list)
+                for i in range(len(result)):
+                    if count[k] > int(result[i].split(' ')[1]):
+                        result = result[:i] + \
+                            ["{}: {}".format(k, count[k])] + \
+                            result[i:]
+                        break
+                    elif count[k] == int(result[i].split(' ')[1]):
+                        alpha_list = [k, result[i].split(' ')[0]]
+                        j = 1
+                        if (i + j) >= len(result):
+                            continue
+                        while count[k] == int(result[i + j].split(' ')[1]):
+                            alpha_list.append(result[i + j].split(' ')[0])
+                        alpha_list = alpha_list.sort
+                        for j in range(len(alpha_list)):
+                            if k == alpha_list[j]:
+                                result = result[:i + j] + \
+                                    ["{}: {}".format(k, count[k])] + \
+                                    result[i + j:]
+                    else:
+                        continue
+                else:
+                    result.append("{}: {}".format(k, count[k]))
+    if result != []:
+        for printing in result:
+            print(printing)
